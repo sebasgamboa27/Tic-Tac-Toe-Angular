@@ -10,8 +10,8 @@ export class BoardComponent implements OnInit {
   xIsNext: boolean;
   winner: string;
   scores = {
-    X: -10,
-    O: 10,
+    X: 10,
+    O: -10,
     tie: 0
   };
 
@@ -28,7 +28,7 @@ export class BoardComponent implements OnInit {
   }
 
   get player() {
-    return this.xIsNext ? 'X' : 'O';
+    return this.xIsNext ? 'O' : 'X';
   }
 
   makeMove(idx: number) {
@@ -41,6 +41,7 @@ export class BoardComponent implements OnInit {
 
     if(!this.xIsNext){
       this.bestMove();
+      this.winner = this.calculateWinner();
       this.xIsNext = !this.xIsNext;
     }
 
@@ -67,6 +68,16 @@ export class BoardComponent implements OnInit {
         return this.squares[a];
       }
     }
+    let state = true;
+    this.squares.forEach(element => {
+      if(element != null){
+        state = false;
+      }
+    });
+
+    if(state){
+      return 'tie';
+    }
     return null;
   }
 
@@ -75,55 +86,65 @@ export class BoardComponent implements OnInit {
     // AI to make its turn
     let bestScore = -Infinity;
     let move;
-    debugger;
     for (let i = 0; i < 9; i++) {
       // Is the spot available?
-      debugger;
-      if (this.squares[i] === null) {
-        this.squares[i] = 'O';
-        let score = this.minimax( 0, false);
+      if (this.squares[i] == null) {
+        this.squares[i] = 'X';
+        let score = this.minimax(this.squares, 0, false);
         this.squares[i] = null;
         if (score > bestScore) {
           bestScore = score;
-          move = {i};
+          move = { i};
         }
       }
     }
-    this.squares[move.i] = 'O';
+    this.squares[move.i] = 'X';
   }
+  
 
 
-  minimax(depth, isMaximizing) {
-    
+  minimax(board, depth, isMaximizing) {
     let result = this.calculateWinner();
-    if (result !== null) {
-      return this.scores[result];
+    if (result != null) {
+      if(result=='X'){
+        return 10;
+      }
+      else if(result=='O'){
+        return -10;
+      }
+      else{
+        debugger;
+        return 0;
+      }
     }
   
     if (isMaximizing) {
       let bestScore = -Infinity;
       for (let i = 0; i < 9; i++) {
-        // Is the spot available?
-        if (this.squares[i] === null) {
-          this.squares[i] = 'O';
-          let score = this.minimax( depth + 1, false);
-          this.squares[i] = null;
+          // Is the spot available?
+        if (board[i] == null) {
+          board[i] = 'X';
+          let score = this.minimax(board, depth + 1, false);
+          board[i] = null;
           bestScore = Math.max(score, bestScore);
         }
+        
       }
       return bestScore;
     } else {
       let bestScore = Infinity;
-      for (let j = 0; j < 9; j++) {
-          // Is the spot available?
-        if (this.squares[j] === null) {
-          this.squares[j]= 'X';
-          let score = this.minimax( depth + 1, true);
-          this.squares[j] = null;
+      for (let i = 0; i < 9; i++) {
+        // Is the spot available?
+        if (board[i] == null) {
+          board[i] = 'O';
+          let score = this.minimax(board, depth + 1, true);
+          board[i] = null;
           bestScore = Math.min(score, bestScore);
         }
+        
       }
       return bestScore;
     }
   }
+  
 }
