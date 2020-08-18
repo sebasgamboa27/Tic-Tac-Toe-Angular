@@ -6,12 +6,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./board.component.scss']
 })
 export class BoardComponent implements OnInit {
-  squares: string[];
+  board: string[][];
   xIsNext: boolean;
   winner: string;
   scores = {
-    X: 10,
-    O: -10,
+    X: -10,
+    O: 10,
     tie: 0
   };
 
@@ -22,18 +22,23 @@ export class BoardComponent implements OnInit {
   }
 
   newGame() {
-    this.squares = Array(9).fill(null);
+    this.board = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', '']
+    ];
     this.winner = null;
     this.xIsNext = true;
   }
 
   get player() {
-    return this.xIsNext ? 'O' : 'X';
+    return this.xIsNext ? 'X' : 'O';
   }
 
-  makeMove(idx: number) {
-    if (!this.squares[idx]) {
-      this.squares.splice(idx, 1, this.player);
+  makeMove(idx: number,idy:number) {
+
+    if (!this.board[idx][idy]) {
+      this.board[idx][idy] = this.player;
       this.xIsNext = !this.xIsNext;
     }
 
@@ -42,43 +47,53 @@ export class BoardComponent implements OnInit {
     if(!this.xIsNext){
       this.bestMove();
       this.winner = this.calculateWinner();
-      this.xIsNext = !this.xIsNext;
     }
 
   }
 
-  calculateWinner() {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6]
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (
-        this.squares[a] &&
-        this.squares[a] === this.squares[b] &&
-        this.squares[a] === this.squares[c]
-      ) {
-        return this.squares[a];
-      }
-    }
-    let state = true;
-    this.squares.forEach(element => {
-      if(element != null){
-        state = false;
-      }
-    });
+  equals3(a, b, c) {
+    return a == b && b == c && a != '';
+  }
 
-    if(state){
-      return 'tie';
+  calculateWinner() {
+    let winner = null;
+  
+    // horizontal
+    for (let i = 0; i < 3; i++) {
+      if (this.equals3(this.board[i][0], this.board[i][1], this.board[i][2])) {
+        winner = this.board[i][0];
+      }
     }
-    return null;
+  
+    // Vertical
+    for (let i = 0; i < 3; i++) {
+      if (this.equals3(this.board[0][i], this.board[1][i], this.board[2][i])) {
+        winner = this.board[0][i];
+      }
+    }
+  
+    // Diagonal
+    if (this.equals3(this.board[0][0], this.board[1][1], this.board[2][2])) {
+      winner = this.board[0][0];
+    }
+    if (this.equals3(this.board[2][0], this.board[1][1], this.board[0][2])) {
+      winner = this.board[2][0];
+    }
+  
+    let openSpots = 0;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (this.board[i][j] == '') {
+          openSpots++;
+        }
+      }
+    }
+  
+    if (winner == null && openSpots == 0) {
+      return 'tie';
+    } else {
+      return winner;
+    }
   }
 
 
@@ -86,62 +101,58 @@ export class BoardComponent implements OnInit {
     // AI to make its turn
     let bestScore = -Infinity;
     let move;
-    for (let i = 0; i < 9; i++) {
-      // Is the spot available?
-      if (this.squares[i] == null) {
-        this.squares[i] = 'X';
-        let score = this.minimax(this.squares, 0, false);
-        this.squares[i] = null;
-        if (score > bestScore) {
-          bestScore = score;
-          move = { i};
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        // Is the spot available?
+        if (this.board[i][j] == '') {
+          this.board[i][j] = 'O';
+          let score = this.minimax(this.board, 0, false);
+          this.board[i][j] = '';
+          if (score > bestScore) {
+            bestScore = score;
+            move = { i, j };
+          }
         }
       }
     }
-    this.squares[move.i] = 'X';
+    this.board[move.i][move.j] = 'O';
+    this.xIsNext = !this.xIsNext;
   }
   
 
 
   minimax(board, depth, isMaximizing) {
     let result = this.calculateWinner();
-    if (result != null) {
-      if(result=='X'){
-        return 10;
-      }
-      else if(result=='O'){
-        return -10;
-      }
-      else{
-        debugger;
-        return 0;
-      }
+    if (result !== null) {
+      return this.scores[result];
     }
   
     if (isMaximizing) {
       let bestScore = -Infinity;
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
           // Is the spot available?
-        if (board[i] == null) {
-          board[i] = 'X';
-          let score = this.minimax(board, depth + 1, false);
-          board[i] = null;
-          bestScore = Math.max(score, bestScore);
+          if (board[i][j] == '') {
+            board[i][j] = 'O';
+            let score = this.minimax(board, depth + 1, false);
+            board[i][j] = '';
+            bestScore = Math.max(score, bestScore);
+          }
         }
-        
       }
       return bestScore;
     } else {
       let bestScore = Infinity;
-      for (let i = 0; i < 9; i++) {
-        // Is the spot available?
-        if (board[i] == null) {
-          board[i] = 'O';
-          let score = this.minimax(board, depth + 1, true);
-          board[i] = null;
-          bestScore = Math.min(score, bestScore);
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          // Is the spot available?
+          if (board[i][j] == '') {
+            board[i][j] = 'X';
+            let score = this.minimax(board, depth + 1, true);
+            board[i][j] = '';
+            bestScore = Math.min(score, bestScore);
+          }
         }
-        
       }
       return bestScore;
     }

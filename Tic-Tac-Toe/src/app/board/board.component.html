@@ -3,17 +3,50 @@
 <button nbButton outline status="danger" class="mb-3" (click)="newGame()">Start new Game</button>
 <hr>
 
-<h2 *ngIf="winner">
+<h2 *ngIf="winner && winner!='tie'">
     Player {{ winner }} won the game!
+</h2>
+<h2 *ngIf="winner==='tie'">
+    It's a tie!
 </h2>
 
 
 <main>
     <app-square 
-        *ngFor="let val of squares; let i = index" 
-        [value]="val"
-        (click)="makeMove(i)"> 
-
+        [value]="board[0][0]"
+        (click)="makeMove(0,0)"> 
+    </app-square>
+    <app-square 
+        [value]="board[0][1]"
+        (click)="makeMove(0,1)"> 
+    </app-square>
+    <app-square 
+        [value]="board[0][2]"
+        (click)="makeMove(0,2)"> 
+    </app-square>
+    <app-square 
+        [value]="board[1][0]"
+        (click)="makeMove(1,0)"> 
+    </app-square>
+    <app-square 
+        [value]="board[1][1]"
+        (click)="makeMove(1,1)"> 
+    </app-square>
+    <app-square 
+        [value]="board[1][2]"
+        (click)="makeMove(1,2)"> 
+    </app-square>
+    <app-square 
+        [value]="board[2][0]"
+        (click)="makeMove(2,0)"> 
+    </app-square>
+    <app-square 
+        [value]="board[2][1]"
+        (click)="makeMove(2,1)"> 
+    </app-square>
+    <app-square 
+        [value]="board[2][2]"
+        (click)="makeMove(2,2)"> 
     </app-square>
 </main>
 
