@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "Tic-Tac-Toe"
+    }
+  },
+  "defaultProject": "Tic-Tac-Toe",
+  "cli": {
+    "analytics": false
+  }
 }
