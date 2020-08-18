@@ -1,6 +1,23 @@
 <h1>Current Player: {{ player }} </h1>
 
-<button nbButton outline status="danger" class="mb-3" (click)="newGame()">Start new Game</button>
+<div class="row">
+    <div class="col">
+        <button nbButton outline status="danger" class="mb-3" (click)="newGame()">Start new Game</button>
+    </div>
+    <div class="col">
+        <nb-select placeholder="AI Level" [(selected)]="AILevel">
+            <nb-option value=1>Level 1</nb-option>
+            <nb-option value=2>Level 2</nb-option>
+            <nb-option value=3>Level 3</nb-option>
+            <nb-option value=4>Level 4</nb-option>
+            <nb-option value=5>Level 5</nb-option>
+            <nb-option value=6>Level 6</nb-option>
+            <nb-option value=7>Level 7</nb-option>
+            <nb-option value=8>Level 8</nb-option>
+            <nb-option value=9>Level 9</nb-option>
+        </nb-select>
+    </div>
+  </div>
 <hr>
 
 <h2 *ngIf="winner && winner!='tie'">

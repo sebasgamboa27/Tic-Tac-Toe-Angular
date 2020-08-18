@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { not } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-board',
@@ -14,6 +15,9 @@ export class BoardComponent implements OnInit {
     O: 10,
     tie: 0
   };
+
+  AILevel: number = 9;
+  AIThinking: boolean;
 
   constructor() {}
 
@@ -36,6 +40,7 @@ export class BoardComponent implements OnInit {
   }
 
   makeMove(idx: number,idy:number) {
+    console.log(this.AILevel);
 
     if (!this.board[idx][idy]) {
       this.board[idx][idy] = this.player;
@@ -44,7 +49,7 @@ export class BoardComponent implements OnInit {
 
     this.winner = this.calculateWinner();
 
-    if(!this.xIsNext){
+    if(!this.xIsNext && this.winner === null){
       this.bestMove();
       this.winner = this.calculateWinner();
     }
@@ -115,6 +120,18 @@ export class BoardComponent implements OnInit {
         }
       }
     }
+    if(move === undefined && this.winner === null){
+      debugger;
+      let notFound = true;
+      while (notFound){
+        let i = Math.floor(Math.random() * (3 - 0) + 0);
+        let j = Math.floor(Math.random() * (3 - 0) + 0);
+        if(this.board[i][j] == ''){
+          move = {i,j};
+          notFound = false;
+        }
+      }
+    }
     this.board[move.i][move.j] = 'O';
     this.xIsNext = !this.xIsNext;
   }
@@ -134,7 +151,13 @@ export class BoardComponent implements OnInit {
           // Is the spot available?
           if (board[i][j] == '') {
             board[i][j] = 'O';
-            let score = this.minimax(board, depth + 1, false);
+            let score;
+            if(depth<=this.AILevel){
+              score = this.minimax(board, depth + 1, false);
+            }
+            else{
+              score = bestScore;
+            }
             board[i][j] = '';
             bestScore = Math.max(score, bestScore);
           }
@@ -148,7 +171,13 @@ export class BoardComponent implements OnInit {
           // Is the spot available?
           if (board[i][j] == '') {
             board[i][j] = 'X';
-            let score = this.minimax(board, depth + 1, true);
+            let score;
+            if(depth<=this.AILevel){
+              score = this.minimax(board, depth + 1, true);
+            }
+            else{
+              score = bestScore;
+            }
             board[i][j] = '';
             bestScore = Math.min(score, bestScore);
           }
